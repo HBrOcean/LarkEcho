@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KGM 转换工具</title>
+<style>
+:root{
+  --bg:#eef0f8;
+  --card:#ffffff;
+  --primary:#5b6ef5;
+  --primary-dark:#4859d6;
+  --text:#22263f;
+  --muted:#8b90b3;
+  --line:#e9ebf6;
+  --ok:#1f9d63;
+  --err:#e04a4f;
+  --run:#e8930c;
+  --shadow:0 4px 20px rgba(80,95,180,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  background:linear-gradient(180deg,#f5f6fc 0%,#e9ecf8 100%);
+  color:var(--text);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:820px;margin:0 auto;padding:26px 26px 40px;display:flex;flex-direction:column;gap:15px;}
+
+header{padding:4px 2px 6px;}
+header h1{font-size:21px;font-weight:650;letter-spacing:.2px;
+  background:linear-gradient(90deg,#3b46c9,#7b6cf6);
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+header .sub{color:var(--muted);font-size:12.5px;margin-top:5px;}
+
+.card{background:var(--card);border-radius:15px;padding:17px 18px;box-shadow:var(--shadow);}
+.card-title{font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.6px;
+  text-transform:uppercase;margin-bottom:12px;}
+
+/* 选择文件区 */
+.dropzone{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  border:2px dashed #ccd2f0;border-radius:12px;padding:26px 16px;cursor:pointer;
+  transition:.18s;background:#fafbff;
+}
+.dropzone:hover{border-color:var(--primary);background:#f3f5ff;}
+.dz-icon{width:38px;height:38px;line-height:36px;text-align:center;font-size:22px;
+  color:var(--primary);background:#eaeaff;border-radius:50%;margin-bottom:3px;}
+.dz-text{font-weight:550;font-size:14px;}
+.dz-hint{font-size:12px;color:var(--muted);}
+
+/* 文件列表 */
+.filelist{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:2px;}
+.filelist li{display:flex;align-items:center;gap:9px;background:#f7f8fe;
+  border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:13px;}
+.filelist li::before{content:"♪";color:var(--primary);font-weight:700;flex:none;}
+.fname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.x{border:none;background:#eceefb;color:#8b90b3;width:21px;height:21px;border-radius:6px;
+  cursor:pointer;font-size:15px;line-height:1;flex:none;transition:.15s;}
+.x:hover{background:#ffe7e8;color:var(--err);}
+
+/* 选项区 */
+.field{margin-bottom:14px;}
+.field>label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:550;}
+.inline{display:flex;gap:8px;}
+.inline input{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px 12px;
+  font-size:12.5px;background:#f9fafe;color:var(--text);font-family:inherit;}
+.inline input::placeholder{color:#b3b8d4;}
+
+.checks{display:flex;flex-wrap:wrap;gap:9px 20px;}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;user-select:none;}
+.chk input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;}
+
+/* 按钮 */
+.btn{font-family:inherit;font-size:13px;border-radius:9px;padding:9px 16px;
+  cursor:pointer;border:1px solid transparent;transition:.16s;font-weight:550;}
+.btn.ghost{background:#f2f3fc;color:#5a5f8a;border-color:var(--line);}
+.btn.ghost:hover{background:#e8eaf8;}
+.btn.primary{background:linear-gradient(135deg,#6675f8,#5b6ef5);color:#fff;
+  box-shadow:0 3px 12px rgba(91,110,245,.32);}
+.btn.primary:hover{background:linear-gradient(135deg,#5b6ef5,#4859d6);}
+.btn.primary:disabled{opacity:.6;cursor:not-allowed;box-shadow:none;}
+.btn.big{width:100%;padding:12px;font-size:14.5px;border-radius:11px;}
+
+/* 进度 */
+.summary{margin-top:13px;padding:11px 14px;border-radius:10px;font-size:13px;
+  background:#eefaf3;color:#1a7a4e;border:1px solid #cdeedd;}
+.summary.hidden{display:none;}
+
+.progress{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:13px;}
+.progress li{background:#f7f8fe;border:1px solid var(--line);border-radius:10px;
+  padding:10px 13px;font-size:13px;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.progress li .row1{display:flex;align-items:center;gap:9px;}
+.idx{font-size:11.5px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums;}
+.progress li .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
+.state{font-size:11.5px;padding:2px 9px;border-radius:20px;flex:none;font-weight:600;}
+.state.running{background:#fff4e0;color:var(--run);}
+.state.ok{background:#e6f7ef;color:var(--ok);}
+.state.fail{background:#fdecec;color:var(--err);}
+.detail{margin-top:7px;padding-left:14px;font-size:12px;color:var(--muted);}
+.detail.err{color:var(--err);word-break:break-all;}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#d3d7ec;border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:#bfc4e0;}
+::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>KGM 转换工具</h1>
+    <p class="sub">酷狗加密音乐 → FLAC / MP3 &nbsp;·&nbsp; 自动补全元数据、封面与歌词</p>
+  </header>
+
+  <section class="card">
+    <div class="card-title">待转换文件</div>
+    <div id="dropzone" class="dropzone">
+      <div class="dz-icon">＋</div>
+      <div class="dz-text">点击选择 .kgm / .vpr 文件</div>
+      <div class="dz-hint">可一次多选</div>
+    </div>
+    <ul id="fileList" class="filelist"></ul>
+  </section>
+
+  <section class="card">
+    <div class="card-title">选项</div>
+    <div class="field">
+      <label>输出目录</label>
+      <div class="inline">
+        <input id="outDir" type="text" placeholder="留空则输出到源文件所在目录" readonly>
+        <button class="btn ghost" id="btnOut">选择…</button>
+      </div>
+    </div>
+    <div class="checks">
+      <label class="chk"><input type="checkbox" id="optMeta" checked><span>补全元数据 / 封面</span></label>
+      <label class="chk"><input type="checkbox" id="optOnline" checked><span>联网查询（酷狗优先）</span></label>
+      <label class="chk"><input type="checkbox" id="optLyric" checked><span>歌词（.lrc + 嵌入音频）</span></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <button id="btnGo" class="btn primary big">开始转换</button>
+    <div id="summary" class="summary hidden"></div>
+    <ul id="progress" class="progress"></ul>
+  </section>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let files = [];
+
+function baseName(p){ return p.split(/[\\/]/).pop(); }
+
+function render(){
+  const ul = $('fileList');
+  ul.innerHTML = '';
+  files.forEach((f, i) => {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+    span.className = 'fname';
+    span.textContent = f.name;
+    span.title = f.path;
+    const btn = document.createElement('button');
+    btn.className = 'x';
+    btn.textContent = '×';
+    btn.onclick = () => { files.splice(i, 1); render(); };
+    li.appendChild(span); li.appendChild(btn);
+    ul.appendChild(li);
+  });
+  $('dropzone').style.display = files.length ? 'none' : 'flex';
+}
+
+function addFiles(paths){
+  (paths || []).forEach(p => {
+    if (!files.some(x => x.path === p)) files.push({ name: baseName(p), path: p });
+  });
+  render();
+}
+
+$('dropzone').onclick = async () => {
+  try { addFiles(await pywebview.api.pick_files()); }
+  catch (e) { console.warn(e); }
+};
+
+$('btnOut').onclick = async () => {
+  try {
+    const d = await pywebview.api.pick_folder();
+    if (d) $('outDir').value = d;
+  } catch (e) { console.warn(e); }
+};
+
+$('btnGo').onclick = async () => {
+  if (!files.length) { alert('请先选择要转换的 .kgm 文件'); return; }
+  $('progress').innerHTML = '';
+  $('summary').classList.add('hidden');
+  $('btnGo').disabled = true;
+  $('btnGo').textContent = '转换中…';
+  try {
+    await pywebview.api.start_convert(
+      files.map(f => f.path),
+      $('outDir').value,
+      {
+        no_meta: !$('optMeta').checked,
+        no_online: !$('optOnline').checked,
+        no_lyric: !$('optLyric').checked
+      }
+    );
+  } catch (e) {
+    $('btnGo').disabled = false;
+    $('btnGo').textContent = '开始转换';
+    alert('启动失败：' + e);
+  }
+};
+
+// ---- Python 端回调 ----
+function onProgress(m){
+  const ul = $('progress');
+  if (m.type === 'start'){
+    const li = document.createElement('li');
+    li.id = 'p' + m.index;
+    li.innerHTML =
+      '<div class="row1">' +
+        '<span class="idx">' + m.index + '/' + m.total + '</span>' +
+        '<span class="name"></span>' +
+        '<span class="state running">转换中</span>' +
+      '</div>';
+    li.querySelector('.name').textContent = m.name;
+    ul.appendChild(li);
+    li.scrollIntoView({block:'nearest', behavior:'smooth'});
+
+  } else if (m.type === 'done' || m.type === 'fail'){
+    const li = $('p' + m.index);
+    if (!li) return;
+    const st = li.querySelector('.state');
+    if (m.type === 'fail'){
+      st.className = 'state fail'; st.textContent = '失败';
+      const d = document.createElement('div');
+      d.className = 'detail err';
+      d.textContent = m.error || '未知错误';
+      li.appendChild(d);
+    } else {
+      st.className = 'state ok'; st.textContent = '完成';
+      const bits = [];
+      if (m.title) bits.push('🎵 ' + (m.artist ? m.artist + ' - ' : '') + m.title);
+      if (m.album) bits.push('💿 ' + m.album);
+      if (m.year) bits.push('📅 ' + m.year);
+      if (m.cover) bits.push('🖼 封面');
+      if (m.lyric) bits.push('📝 歌词');
+      if (m.source) bits.push('🌐 ' + m.source);
+      if (bits.length){
+        const d = document.createElement('div');
+        d.className = 'detail';
+        d.textContent = bits.join('　·　');
+        li.appendChild(d);
+      }
+    }
+
+  } else if (m.type === 'all_done'){
+    $('btnGo').disabled = false;
+    $('btnGo').textContent = '开始转换';
+    const s = $('summary');
+    s.classList.remove('hidden');
+    s.innerHTML = '全部处理完毕：成功 <b>' + m.ok + '</b> / 共 <b>' + m.total + '</b> 个';
+  }
+}
+</script>
+</body>
+</html>

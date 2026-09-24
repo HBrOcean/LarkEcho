@@ -1,0 +1,28 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.python-version
+
+# ---- PyInstaller 构建产物 ----
+build/
+dist/
+*.spec
+
+# ---- IDE / 编辑器 ----
+.vscode/
+.idea/
+*.swp
+
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 测试产生的临时文件 ----
+*.lrc

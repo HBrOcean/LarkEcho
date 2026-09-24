@@ -1,0 +1,129 @@
+name: Build
+
+# 何时触发
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]              # 打 v1.0 这类 tag 时额外发布 Release
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:            # 也支持在 Actions 页面手动点按钮构建
+
+permissions:
+  contents: write
+
+jobs:
+  # ========================= Windows：CLI + GUI =========================
+  windows:
+    name: Windows (CLI + GUI)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview mutagen
+
+      - name: Build CLI (kgm2all)
+        run: python tools/build.py cli
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgm2all-windows
+          path: dist/kgm2all.exe
+          if-no-files-found: error
+
+      - name: Build GUI (kgm2gui)
+        run: python tools/build.py gui
+
+      - name: Upload GUI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgm2gui-windows
+          path: dist/kgm2gui.exe
+          if-no-files-found: error
+
+  # ========================= Linux：CLI =========================
+  linux:
+    name: Linux (CLI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller mutagen
+
+      - name: Build CLI
+        run: python tools/build.py cli
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgm2all-linux
+          path: dist/kgm2all
+          if-no-files-found: error
+
+  # ========================= macOS：CLI =========================
+  macos:
+    name: macOS (CLI)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller mutagen
+
+      - name: Build CLI
+        run: python tools/build.py cli
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgm2all-macos
+          path: dist/kgm2all
+          if-no-files-found: error
+
+  # ================= 打 tag 时：建 Release 并附上全部产物 =================
+  release:
+    name: Publish Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ windows, linux, macos ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded files
+        run: find artifacts -type f | sort
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
