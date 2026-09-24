@@ -22,10 +22,17 @@ import sys
 import threading
 import traceback
 
+# Windows 控制台默认编码不是 UTF-8，放宽输出错误处理，避免中文 print 崩溃
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(errors="replace")
+    except Exception:
+        pass
+
 try:
     import webview
 except ImportError:
-    sys.exit("[错误] 缺少 pywebview，请先安装：\n    pip install pywebview")
+    sys.exit("[ERROR] pywebview not found. Install it first:\n    pip install pywebview")
 
 import lark as K
 

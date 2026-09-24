@@ -12,6 +12,12 @@ on:
 permissions:
   contents: write
 
+# 全局强制 Python 使用 UTF-8 输出，避免 Windows runner 默认 cp1252
+# 遇到非 ASCII 字符时抛 UnicodeEncodeError
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: '1'
+
 jobs:
   # ========================= Windows：CLI + GUI =========================
   windows:

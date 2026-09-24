@@ -57,6 +57,14 @@ import urllib.request
 import zlib
 from datetime import datetime
 
+# Windows 控制台默认编码不是 UTF-8，放宽输出错误处理，
+# 避免非 ASCII 字符（中文）print 时抛 UnicodeEncodeError。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(errors="replace")
+    except Exception:
+        pass
+
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
