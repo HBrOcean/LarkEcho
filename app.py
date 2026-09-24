@@ -20,7 +20,6 @@ import json
 import os
 import sys
 import threading
-import traceback
 
 # Windows 控制台默认编码不是 UTF-8，放宽输出错误处理，避免中文 print 崩溃
 for _stream in (sys.stdout, sys.stderr):

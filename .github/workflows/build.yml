@@ -12,112 +12,146 @@ on:
 permissions:
   contents: write
 
-# 全局强制 Python 使用 UTF-8 输出，避免 Windows runner 默认 cp1252
+# 同一分支的重复运行自动取消，省额度
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 全局强制 Python 用 UTF-8 输出，避免 Windows runner 默认 cp1252
 # 遇到非 ASCII 字符时抛 UnicodeEncodeError
 env:
   PYTHONIOENCODING: utf-8
   PYTHONUTF8: '1'
 
 jobs:
-  # ========================= Windows：CLI + GUI =========================
-  windows:
-    name: Windows (CLI + GUI)
+  # =====================================================================
+  # CLI：三个平台各自独立，互不影响
+  # =====================================================================
+  cli-windows:
+    name: Windows · CLI
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller pywebview mutagen
+        run: pip install mutagen pyinstaller
 
-      - name: Build CLI (lark)
+      - name: Build
         run: python tools/build.py cli
 
-      - name: Upload CLI artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: lark-windows
           path: dist/lark.exe
           if-no-files-found: error
 
-      - name: Build GUI (lark-gui)
-        run: python tools/build.py gui
-
-      - name: Upload GUI artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lark-gui-windows
-          path: dist/lark-gui.exe
-          if-no-files-found: error
-
-  # ========================= Linux：CLI =========================
-  linux:
-    name: Linux (CLI)
+  cli-linux:
+    name: Linux · CLI
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller mutagen
+        run: pip install mutagen pyinstaller
 
-      - name: Build CLI
+      - name: Build
         run: python tools/build.py cli
 
-      - name: Upload CLI artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: lark-linux
           path: dist/lark
           if-no-files-found: error
 
-  # ========================= macOS：CLI =========================
-  macos:
-    name: macOS (CLI)
+  cli-macos:
+    name: macOS · CLI
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller mutagen
+        run: pip install mutagen pyinstaller
 
-      - name: Build CLI
+      - name: Build
         run: python tools/build.py cli
 
-      - name: Upload CLI artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: lark-macos
           path: dist/lark
           if-no-files-found: error
 
-  # ================= 打 tag 时：建 Release 并附上全部产物 =================
+  # =====================================================================
+  # GUI：只有 Windows 有原生窗口版，单独一个 job
+  # 独立成 job 的好处：即使 pywebview 打包出问题，上面的 CLI 产物照样能拿到
+  # =====================================================================
+  gui-windows:
+    name: Windows · GUI
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install mutagen pywebview pyinstaller
+
+      - name: Build
+        run: python tools/build.py gui
+
+      - name: Verify the exe exists
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/lark-gui.exe")) {
+            Write-Error "dist/lark-gui.exe was not produced"
+            exit 1
+          }
+          Get-Item "dist/lark-gui.exe" | Select-Object Name, Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lark-gui-windows
+          path: dist/lark-gui.exe
+          if-no-files-found: error
+
+  # =====================================================================
+  # 打 tag 时：建 Release 并附上全部产物
+  # 只依赖三个 CLI job，这样即使 GUI 打包失败，Release 依然能发出
+  # =====================================================================
   release:
     name: Publish Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [ windows, linux, macos ]
+    needs: [ cli-windows, cli-linux, cli-macos ]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
