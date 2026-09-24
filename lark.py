@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-kgm2all.py —— 酷狗音乐 KGM 解密 + 元数据 + 封面 + 歌词（一体化单文件版）。
+lark.py —— 酷狗音乐 KGM 解密 + 元数据 + 封面 + 歌词（一体化单文件版）。
 
 把原来拆分的 kgm2F / kgm2M / kgm2O / kgm2L / kgm2F_L 合并成这一个文件，
 一条命令完成「解密 → 补元数据 → 补封面 → 查歌词」，歌词会：
@@ -25,12 +25,12 @@ kgm2all.py —— 酷狗音乐 KGM 解密 + 元数据 + 封面 + 歌词（一体
 
 用法
 ----
-    python3 kgm2all.py 周杰伦-晴天.kgm            # 解密 + 元数据 + 封面 + 歌词
-    python3 kgm2all.py -r ./音乐目录/             # 递归处理整个目录
-    python3 kgm2all.py 晴天.kgm --album 叶惠美 --year 2003 --cover c.jpg
-    python3 kgm2all.py 歌曲.kgm --no-lyric        # 不处理歌词
-    python3 kgm2all.py 歌曲.kgm --no-online       # 禁用在线查询，仅本地补全
-    python3 kgm2all.py -d 歌曲.kgm                # 解密成功后删除原加密文件
+    python3 lark.py 周杰伦-晴天.kgm            # 解密 + 元数据 + 封面 + 歌词
+    python3 lark.py -r ./音乐目录/             # 递归处理整个目录
+    python3 lark.py 晴天.kgm --album 叶惠美 --year 2003 --cover c.jpg
+    python3 lark.py 歌曲.kgm --no-lyric        # 不处理歌词
+    python3 lark.py 歌曲.kgm --no-online       # 禁用在线查询，仅本地补全
+    python3 lark.py -d 歌曲.kgm                # 解密成功后删除原加密文件
 
 打包成 exe 后（双击即用）
 ------------------------

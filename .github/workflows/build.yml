@@ -31,24 +31,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller pywebview mutagen
 
-      - name: Build CLI (kgm2all)
+      - name: Build CLI (lark)
         run: python tools/build.py cli
 
       - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kgm2all-windows
-          path: dist/kgm2all.exe
+          name: lark-windows
+          path: dist/lark.exe
           if-no-files-found: error
 
-      - name: Build GUI (kgm2gui)
+      - name: Build GUI (lark-gui)
         run: python tools/build.py gui
 
       - name: Upload GUI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kgm2gui-windows
-          path: dist/kgm2gui.exe
+          name: lark-gui-windows
+          path: dist/lark-gui.exe
           if-no-files-found: error
 
   # ========================= Linux：CLI =========================
@@ -75,8 +75,8 @@ jobs:
       - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kgm2all-linux
-          path: dist/kgm2all
+          name: lark-linux
+          path: dist/lark
           if-no-files-found: error
 
   # ========================= macOS：CLI =========================
@@ -103,8 +103,8 @@ jobs:
       - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kgm2all-macos
-          path: dist/kgm2all
+          name: lark-macos
+          path: dist/lark
           if-no-files-found: error
 
   # ================= 打 tag 时：建 Release 并附上全部产物 =================

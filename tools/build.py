@@ -5,8 +5,8 @@ tools/build.py —— 跨平台打包脚本：把 Python 源码打包成单文�
 
 用法
 ----
-    python tools/build.py cli      # 只打命令行版 kgm2all
-    python tools/build.py gui      # 只打图形界面版 kgm2gui（Windows）
+    python tools/build.py cli      # 只打命令行版 lark
+    python tools/build.py gui      # 只打图形界面版 lark-gui（Windows）
     python tools/build.py all      # 两个都打
 
 产物输出到 dist/ 目录。
@@ -52,21 +52,21 @@ def _add_icon(args):
 
 def build_cli():
     """打包命令行版：解密 + 元数据 + 封面 + 歌词。"""
-    print(">>> 打包 命令行版 kgm2all ...")
+    print(">>> 打包 命令行版 lark ...")
     if not os.path.isfile(KEY):
         sys.exit(f"[错误] 找不到公钥文件：{KEY}")
     args = [
-        os.path.join(ROOT, "kgm2all.py"),
+        os.path.join(ROOT, "lark.py"),
         *COMMON,
         "--add-data", f"{KEY}{SEP}.",
-        "--name", "kgm2all",
+        "--name", "lark",
     ]
     pyi.run(_add_icon(args))
 
 
 def build_gui():
     """打包图形界面版：pywebview 桌面窗口 + HTML 界面。"""
-    print(">>> 打包 图形界面版 kgm2gui ...")
+    print(">>> 打包 图形界面版 lark-gui ...")
     for f in (INDEX, KEY):
         if not os.path.isfile(f):
             sys.exit(f"[错误] 找不到文件：{f}")
@@ -79,7 +79,7 @@ def build_gui():
         # pywebview 的平台后端是动态导入的，PyInstaller 静态分析看不到
         "--collect-all", "webview",
         "--hidden-import", "clr",
-        "--name", "kgm2gui",
+        "--name", "lark-gui",
     ]
     pyi.run(_add_icon(args))
 

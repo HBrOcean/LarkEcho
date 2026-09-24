@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-app.py —— KGM 转换工具 · 桌面图形版
+app.py —— LarkEcho · 桌面图形版
 
 用 pywebview 把 index.html 界面装进一个原生桌面窗口，双击 exe 即可使用。
-核心转换逻辑复用同目录的 kgm2all.py（解密 / 元数据 / 封面 / 歌词）。
+核心转换逻辑复用同目录的 lark.py（解密 / 元数据 / 封面 / 歌词）。
 
 依赖
 ----
     pip install pywebview mutagen
-（其余为标准库；kgm2all.py 与 kugou_key.xz 需在同目录）
+（其余为标准库；lark.py 与 kugou_key.xz 需在同目录）
 
 打包
 ----
-    Windows 上双击 build_exe.bat 一键打包成 dist\\kgm2gui.exe
+    Windows 上双击 build_exe.bat 一键打包成 dist\\lark-gui.exe
 """
 
 import json
@@ -27,7 +27,7 @@ try:
 except ImportError:
     sys.exit("[错误] 缺少 pywebview，请先安装：\n    pip install pywebview")
 
-import kgm2all as K
+import lark as K
 
 
 # ---------------------------------------------------------------------------
@@ -195,7 +195,7 @@ def main():
 
     api = Api()
     window = webview.create_window(
-        "KGM 转换工具",
+        "LarkEcho",
         resource_path("index.html"),
         js_api=api,
         width=880,

@@ -1,6 +1,8 @@
-# KGM Decryptor · 酷狗加密音乐转换工具
+# LarkEcho
 
-[![Build](https://github.com/HBrOcean/kgm-decryptor/actions/workflows/build.yml/badge.svg)](https://github.com/HBrOcean/kgm-decryptor/actions/workflows/build.yml)
+> 轻量的音乐格式转换工具 —— 把加密音乐还原成标准音频，自动补全元数据、封面与歌词。
+
+[![Build](https://github.com/HBrOcean/LarkEcho/actions/workflows/build.yml/badge.svg)](https://github.com/HBrOcean/LarkEcho/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-3776ab.svg)
 
@@ -33,9 +35,9 @@
 
 | 产物 | 平台 | 说明 |
 |---|---|---|
-| `kgm2gui.exe` | Windows | **图形界面版**，双击即用 |
-| `kgm2all.exe` | Windows | 命令行版 |
-| `kgm2all` | Linux / macOS | 命令行版 |
+| `lark-gui.exe` | Windows | **图形界面版**，双击即用 |
+| `lark.exe` | Windows | 命令行版 |
+| `lark` | Linux / macOS | 命令行版 |
 
 > 每次推送代码或手动触发（`workflow_dispatch`）都会自动构建；
 > 打 `v*` 标签（如 `v1.0`）则会自动创建 Release 并附上全部产物。
@@ -57,7 +59,7 @@ Windows 用户也可以直接双击根目录的 `build_exe.bat`。
 
 ```bash
 pip install mutagen            # 图形界面版还需要：pip install pywebview
-python kgm2all.py 歌曲.kgm      # 命令行版
+python lark.py 歌曲.kgm      # 命令行版
 python app.py                  # 图形界面版
 ```
 
@@ -65,23 +67,23 @@ python app.py                  # 图形界面版
 
 ## 🚀 使用
 
-### 图形界面版（`kgm2gui.exe` / `python app.py`）
+### 图形界面版（`lark-gui.exe` / `python app.py`）
 
 1. 点击虚线框选择 `.kgm` / `.vpr` 文件（可多选）
 2. 选择输出目录（留空 = 输出到源文件所在目录）
 3. 勾选需要的选项：元数据/封面、联网查询、歌词
 4. 点「开始转换」，界面会实时显示每个文件的进度与识别结果
 
-### 命令行版（`kgm2all.exe` / `python kgm2all.py`）
+### 命令行版（`lark.exe` / `python lark.py`）
 
 ```bash
-python kgm2all.py 周杰伦-晴天.kgm              # 解密 + 元数据 + 封面 + 歌词
-python kgm2all.py -r ./音乐目录/               # 递归处理整个目录
-python kgm2all.py 歌曲.kgm --no-lyric          # 不处理歌词
-python kgm2all.py 歌曲.kgm --no-online         # 禁用联网，仅本地补全
-python kgm2all.py -d 歌曲.kgm                  # 解密成功后删除原加密文件
-python kgm2all.py 歌曲.kgm --album 叶惠美 --year 2003 --cover c.jpg
-python kgm2all.py -h                           # 查看全部参数
+python lark.py 周杰伦-晴天.kgm              # 解密 + 元数据 + 封面 + 歌词
+python lark.py -r ./音乐目录/               # 递归处理整个目录
+python lark.py 歌曲.kgm --no-lyric          # 不处理歌词
+python lark.py 歌曲.kgm --no-online         # 禁用联网，仅本地补全
+python lark.py -d 歌曲.kgm                  # 解密成功后删除原加密文件
+python lark.py 歌曲.kgm --album 叶惠美 --year 2003 --cover c.jpg
+python lark.py -h                           # 查看全部参数
 ```
 
 ---
@@ -89,14 +91,14 @@ python kgm2all.py -h                           # 查看全部参数
 ## 📁 项目结构
 
 ```
-kgm-decryptor/
+LarkEcho/
 ├── .github/workflows/build.yml   # GitHub Actions：多平台构建 + artifacts
 ├── assets/
 │   ├── icon.ico                  # 应用图标
 │   └── kugou_key.xz              # 解密公钥（压缩后 ~92 KB）
 ├── tools/
 │   └── build.py                  # 跨平台打包脚本
-├── kgm2all.py                    # 核心逻辑 + 命令行入口
+├── lark.py                    # 核心逻辑 + 命令行入口
 ├── app.py                        # 图形界面入口（pywebview）
 ├── index.html                    # 图形界面
 ├── build_exe.bat                 # Windows 一键打包（本地用）
